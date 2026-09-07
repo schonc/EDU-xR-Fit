@@ -1,0 +1,512 @@
+ <!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VR/AR-Bewertungstool</title>
+<style>
+    body {font-family: Arial, sans-serif; margin:0; background:#f5f7fb; color:#222; line-height:1.5;}
+    header {background:#263859;color:white;padding:2rem;text-align:center;}
+    main {max-width:1000px;margin:2rem auto;padding:0 1rem;}
+    section {background:white;margin-bottom:1.5rem;padding:1.5rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    h2 {color:#263859;margin-top:0;}
+    .question {margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid #ddd;}
+    .question:last-child {border-bottom:none;}
+    label {display:inline-block;margin:0.3rem 0.8rem 0.3rem 0;}
+    .hint {margin-top:0.5rem;padding:0.6rem;border-radius:8px;background:#eef2f8;border-left:5px solid #263859;font-size:0.9rem;}
+    button {background:#263859;color:white;border:none;padding:1rem 1.5rem;border-radius:8px;cursor:pointer;font-size:1rem;}
+    button:hover {background:#1d2a43;}
+    #result {display:none;border-left:6px solid #263859;}
+    #actionRecommendations {margin-top:1rem;}
+    #actionRecommendations li {margin-bottom:0.6rem;}
+    .scale-note {font-size:0.95rem;color:#444;}
+  
+    .language-section {margin-top:1.5rem;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+<h1 data-i18n="mainTitle"></h1>
+<p data-i18n="mainSubtitle"></p>
+</header>
+<main><section class="language-section"><h2 data-i18n="languageTitle"></h2><label for="languageSelect"><strong data-i18n="languageLabel"></strong></label> <select id="languageSelect"><option value="de">Deutsch</option><option value="en">English</option></select></section>
+<section>
+<h2 data-i18n="introTitle"></h2>
+<p class="scale-note" data-i18n-html="introText"></p>
+</section>
+<form id="assessmentForm">
+<section>
+<h2 data-i18n="personTitle"></h2>
+<div class="question">
+<p><strong data-i18n="experienceQuestion"></strong></p>
+<label><input name="experience_level" required="" type="radio" value="Anfänger"/><span data-i18n="experienceBeginner"></span></label>
+<label><input name="experience_level" type="radio" value="Fortgeschrittener"/><span data-i18n="experienceAdvanced"></span></label>
+<label><input name="experience_level" type="radio" value="Experte"/><span data-i18n="experienceExpert"></span></label>
+<label><input name="experience_level" type="radio" value="Allgemeines Profil"/><span data-i18n="experienceBasis"></span></label>
+
+
+
+<div class="hint" data-i18n="experienceHint"></div>
+</div>
+</section>
+<section><h2 data-i18n="contextTitle"></h2>
+<div class="question">
+<p><strong data-i18n="evaluationQuestion"></strong></p>
+<label>
+<input name="evaluation_type" required="" type="radio" value="LehrenLernen"/><span data-i18n="evalTeachLearn"></span></label>
+<label>
+<input name="evaluation_type" type="radio" value="Pruefen"/><span data-i18n="evalAssess"></span></label>
+<label>
+<input name="evaluation_type" type="radio" value="Beides"/><span data-i18n="evalBoth"></span></label>
+<div class="hint" data-i18n="evaluationHint"></div>
+</div>
+</section>
+<section id="instruktivePassungSection">
+<h2 data-i18n="sectionInstructional"></h2>
+<div class="question"><p data-question="q1"></p><label><input name="q1" required="" type="radio" value="1"/>1</label><label><input name="q1" type="radio" value="2"/>2</label><label><input name="q1" type="radio" value="3"/>3</label><label><input name="q1" type="radio" value="4"/>4</label><label><input name="q1" type="radio" value="5"/>5</label><div class="hint" data-hint="q1"></div></div>
+<div class="question"><p data-question="q2"></p><label><input name="q2" required="" type="radio" value="1"/>1</label><label><input name="q2" type="radio" value="2"/>2</label><label><input name="q2" type="radio" value="3"/>3</label><label><input name="q2" type="radio" value="4"/>4</label><label><input name="q2" type="radio" value="5"/>5</label><div class="hint" data-hint="q2"></div></div>
+<div class="question"><p data-question="q3"></p><label><input name="q3" required="" type="radio" value="1"/>1</label><label><input name="q3" type="radio" value="2"/>2</label><label><input name="q3" type="radio" value="3"/>3</label><label><input name="q3" type="radio" value="4"/>4</label><label><input name="q3" type="radio" value="5"/>5</label><div class="hint" data-hint="q3"></div></div>
+<div class="question"><p data-question="q4"></p><label><input name="q4" required="" type="radio" value="1"/>1</label><label><input name="q4" type="radio" value="2"/>2</label><label><input name="q4" type="radio" value="3"/>3</label><label><input name="q4" type="radio" value="4"/>4</label><label><input name="q4" type="radio" value="5"/>5</label><div class="hint" data-hint="q4"></div></div>
+<div class="question"><p data-question="q5"></p><label><input name="q5" required="" type="radio" value="1"/>1</label><label><input name="q5" type="radio" value="2"/>2</label><label><input name="q5" type="radio" value="3"/>3</label><label><input name="q5" type="radio" value="4"/>4</label><label><input name="q5" type="radio" value="5"/>5</label><div class="hint" data-hint="q5"></div></div>
+<div class="question"><p data-question="q6"></p><label><input name="q6" required="" type="radio" value="1"/>1</label><label><input name="q6" type="radio" value="2"/>2</label><label><input name="q6" type="radio" value="3"/>3</label><label><input name="q6" type="radio" value="4"/>4</label><label><input name="q6" type="radio" value="5"/>5</label><div class="hint" data-hint="q6"></div></div>
+<div class="question"><p data-question="q7"></p><label><input name="q7" required="" type="radio" value="1"/>1</label><label><input name="q7" type="radio" value="2"/>2</label><label><input name="q7" type="radio" value="3"/>3</label><label><input name="q7" type="radio" value="4"/>4</label><label><input name="q7" type="radio" value="5"/>5</label><div class="hint" data-hint="q7"></div></div>
+<div class="question"><p data-question="q8"></p><label><input name="q8" required="" type="radio" value="1"/>1</label><label><input name="q8" type="radio" value="2"/>2</label><label><input name="q8" type="radio" value="3"/>3</label><label><input name="q8" type="radio" value="4"/>4</label><label><input name="q8" type="radio" value="5"/>5</label><div class="hint" data-hint="q8"></div></div>
+</section>
+<section id="lernenSection">
+<h2 data-i18n="sectionLearning"></h2>
+<div class="question"><p data-question="q9"></p><label><input name="q9" required="" type="radio" value="1"/>1</label><label><input name="q9" type="radio" value="2"/>2</label><label><input name="q9" type="radio" value="3"/>3</label><label><input name="q9" type="radio" value="4"/>4</label><label><input name="q9" type="radio" value="5"/>5</label><div class="hint" data-hint="q9"></div></div>
+<div class="question"><p data-question="q10"></p><label><input name="q10" required="" type="radio" value="1"/>1</label><label><input name="q10" type="radio" value="2"/>2</label><label><input name="q10" type="radio" value="3"/>3</label><label><input name="q10" type="radio" value="4"/>4</label><label><input name="q10" type="radio" value="5"/>5</label><div class="hint" data-hint="q10"></div></div>
+<div class="question"><p data-question="q11"></p><label><input name="q11" required="" type="radio" value="1"/>1</label><label><input name="q11" type="radio" value="2"/>2</label><label><input name="q11" type="radio" value="3"/>3</label><label><input name="q11" type="radio" value="4"/>4</label><label><input name="q11" type="radio" value="5"/>5</label><div class="hint" data-hint="q11"></div></div>
+<div class="question"><p data-question="q12"></p><label><input name="q12" required="" type="radio" value="1"/>1</label><label><input name="q12" type="radio" value="2"/>2</label><label><input name="q12" type="radio" value="3"/>3</label><label><input name="q12" type="radio" value="4"/>4</label><label><input name="q12" type="radio" value="5"/>5</label><div class="hint" data-hint="q12"></div></div>
+<div class="question"><p data-question="q13"></p><label><input name="q13" required="" type="radio" value="1"/>1</label><label><input name="q13" type="radio" value="2"/>2</label><label><input name="q13" type="radio" value="3"/>3</label><label><input name="q13" type="radio" value="4"/>4</label><label><input name="q13" type="radio" value="5"/>5</label><div class="hint" data-hint="q13"></div></div>
+<div class="question"><p data-question="q14"></p><label><input name="q14" required="" type="radio" value="1"/>1</label><label><input name="q14" type="radio" value="2"/>2</label><label><input name="q14" type="radio" value="3"/>3</label><label><input name="q14" type="radio" value="4"/>4</label><label><input name="q14" type="radio" value="5"/>5</label><div class="hint" data-hint="q14"></div></div>
+</section>
+<section id="pruefenSection">
+<h2 data-i18n="sectionAssessment"></h2>
+<div class="question"><p data-question="q15"></p><label><input name="q15" required="" type="radio" value="1"/>1</label><label><input name="q15" type="radio" value="2"/>2</label><label><input name="q15" type="radio" value="3"/>3</label><label><input name="q15" type="radio" value="4"/>4</label><label><input name="q15" type="radio" value="5"/>5</label><div class="hint" data-hint="q15"></div></div>
+<div class="question"><p data-question="q16"></p><label><input name="q16" required="" type="radio" value="1"/>1</label><label><input name="q16" type="radio" value="2"/>2</label><label><input name="q16" type="radio" value="3"/>3</label><label><input name="q16" type="radio" value="4"/>4</label><label><input name="q16" type="radio" value="5"/>5</label><div class="hint" data-hint="q16"></div></div>
+<div class="question"><p data-question="q17"></p><label><input name="q17" required="" type="radio" value="1"/>1</label><label><input name="q17" type="radio" value="2"/>2</label><label><input name="q17" type="radio" value="3"/>3</label><label><input name="q17" type="radio" value="4"/>4</label><label><input name="q17" type="radio" value="5"/>5</label><div class="hint" data-hint="q17"></div></div>
+<div class="question"><p data-question="q18"></p><label><input name="q18" required="" type="radio" value="1"/>1</label><label><input name="q18" type="radio" value="2"/>2</label><label><input name="q18" type="radio" value="3"/>3</label><label><input name="q18" type="radio" value="4"/>4</label><label><input name="q18" type="radio" value="5"/>5</label><div class="hint" data-hint="q18"></div></div>
+</section>
+<section>
+<h2 data-i18n="sectionPedagogical"></h2>
+<div class="question"><p data-question="q19"></p><label><input name="q19" required="" type="radio" value="1"/>1</label><label><input name="q19" type="radio" value="2"/>2</label><label><input name="q19" type="radio" value="3"/>3</label><label><input name="q19" type="radio" value="4"/>4</label><label><input name="q19" type="radio" value="5"/>5</label><div class="hint" data-hint="q19"></div></div>
+<div class="question"><p data-question="q20"></p><label><input name="q20" required="" type="radio" value="1"/>1</label><label><input name="q20" type="radio" value="2"/>2</label><label><input name="q20" type="radio" value="3"/>3</label><label><input name="q20" type="radio" value="4"/>4</label><label><input name="q20" type="radio" value="5"/>5</label><div class="hint" data-hint="q20"></div></div>
+<div class="question"><p data-question="q21"></p><label><input name="q21" required="" type="radio" value="1"/>1</label><label><input name="q21" type="radio" value="2"/>2</label><label><input name="q21" type="radio" value="3"/>3</label><label><input name="q21" type="radio" value="4"/>4</label><label><input name="q21" type="radio" value="5"/>5</label><div class="hint" data-hint="q21"></div></div>
+<div class="question"><p data-question="q22"></p><label><input name="q22" required="" type="radio" value="1"/>1</label><label><input name="q22" type="radio" value="2"/>2</label><label><input name="q22" type="radio" value="3"/>3</label><label><input name="q22" type="radio" value="4"/>4</label><label><input name="q22" type="radio" value="5"/>5</label><div class="hint" data-hint="q22"></div></div>
+<div class="question"><p data-question="q23"></p><label><input name="q23" required="" type="radio" value="1"/>1</label><label><input name="q23" type="radio" value="2"/>2</label><label><input name="q23" type="radio" value="3"/>3</label><label><input name="q23" type="radio" value="4"/>4</label><label><input name="q23" type="radio" value="5"/>5</label><div class="hint" data-hint="q23"></div></div>
+</section>
+<section>
+<h2 data-i18n="sectionContextual"></h2>
+<div class="question"><p data-question="q24"></p><label><input name="q24" required="" type="radio" value="1"/>1</label><label><input name="q24" type="radio" value="2"/>2</label><label><input name="q24" type="radio" value="3"/>3</label><label><input name="q24" type="radio" value="4"/>4</label><label><input name="q24" type="radio" value="5"/>5</label><div class="hint" data-hint="q24"></div></div>
+<div class="question"><p data-question="q25"></p><label><input name="q25" required="" type="radio" value="1"/>1</label><label><input name="q25" type="radio" value="2"/>2</label><label><input name="q25" type="radio" value="3"/>3</label><label><input name="q25" type="radio" value="4"/>4</label><label><input name="q25" type="radio" value="5"/>5</label><div class="hint" data-hint="q25"></div></div>
+<div class="question"><p data-question="q26"></p><label><input name="q26" required="" type="radio" value="1"/>1</label><label><input name="q26" type="radio" value="2"/>2</label><label><input name="q26" type="radio" value="3"/>3</label><label><input name="q26" type="radio" value="4"/>4</label><label><input name="q26" type="radio" value="5"/>5</label><div class="hint" data-hint="q26"></div></div>
+<div class="question"><p data-question="q27"></p><label><input name="q27" required="" type="radio" value="1"/>1</label><label><input name="q27" type="radio" value="2"/>2</label><label><input name="q27" type="radio" value="3"/>3</label><label><input name="q27" type="radio" value="4"/>4</label><label><input name="q27" type="radio" value="5"/>5</label><div class="hint" data-hint="q27"></div></div>
+<div class="question"><p data-question="q28"></p><label><input name="q28" required="" type="radio" value="1"/>1</label><label><input name="q28" type="radio" value="2"/>2</label><label><input name="q28" type="radio" value="3"/>3</label><label><input name="q28" type="radio" value="4"/>4</label><label><input name="q28" type="radio" value="5"/>5</label><div class="hint" data-hint="q28"></div></div>
+<div class="question"><p data-question="q29"></p><label><input name="q29" required="" type="radio" value="1"/>1</label><label><input name="q29" type="radio" value="2"/>2</label><label><input name="q29" type="radio" value="3"/>3</label><label><input name="q29" type="radio" value="4"/>4</label><label><input name="q29" type="radio" value="5"/>5</label><div class="hint" data-hint="q29"></div></div>
+<div class="question"><p data-question="q30"></p><label><input name="q30" required="" type="radio" value="1"/>1</label><label><input name="q30" type="radio" value="2"/>2</label><label><input name="q30" type="radio" value="3"/>3</label><label><input name="q30" type="radio" value="4"/>4</label><label><input name="q30" type="radio" value="5"/>5</label><div class="hint" data-hint="q30"></div></div>
+<div class="question"><p data-question="q31"></p><label><input name="q31" required="" type="radio" value="1"/>1</label><label><input name="q31" type="radio" value="2"/>2</label><label><input name="q31" type="radio" value="3"/>3</label><label><input name="q31" type="radio" value="4"/>4</label><label><input name="q31" type="radio" value="5"/>5</label><div class="hint" data-hint="q31"></div></div>
+<div class="question"><p data-question="q32"></p><label><input name="q32" required="" type="radio" value="1"/>1</label><label><input name="q32" type="radio" value="2"/>2</label><label><input name="q32" type="radio" value="3"/>3</label><label><input name="q32" type="radio" value="4"/>4</label><label><input name="q32" type="radio" value="5"/>5</label><div class="hint" data-hint="q32"></div></div>
+<div class="question"><p data-question="q33"></p><label><input name="q33" required="" type="radio" value="1"/>1</label><label><input name="q33" type="radio" value="2"/>2</label><label><input name="q33" type="radio" value="3"/>3</label><label><input name="q33" type="radio" value="4"/>4</label><label><input name="q33" type="radio" value="5"/>5</label><div class="hint" data-hint="q33"></div></div>
+<div class="question"><p data-question="q34"></p><label><input name="q34" required="" type="radio" value="1"/>1</label><label><input name="q34" type="radio" value="2"/>2</label><label><input name="q34" type="radio" value="3"/>3</label><label><input name="q34" type="radio" value="4"/>4</label><label><input name="q34" type="radio" value="5"/>5</label><div class="hint" data-hint="q34"></div></div>
+<div class="question"><p data-question="q43"></p><label><input name="q43" required="" type="radio" value="1"/>1</label><label><input name="q43" type="radio" value="2"/>2</label><label><input name="q43" type="radio" value="3"/>3</label><label><input name="q43" type="radio" value="4"/>4</label><label><input name="q43" type="radio" value="5"/>5</label><div class="hint" data-hint="q43"></div></div>
+</section>
+<section>
+<h2 data-i18n="sectionTechnical"></h2>
+<div class="question"><p data-question="q35"></p><label><input name="q35" required="" type="radio" value="1"/>1</label><label><input name="q35" type="radio" value="2"/>2</label><label><input name="q35" type="radio" value="3"/>3</label><label><input name="q35" type="radio" value="4"/>4</label><label><input name="q35" type="radio" value="5"/>5</label><div class="hint" data-hint="q35"></div></div>
+<div class="question"><p data-question="q36"></p><label><input name="q36" required="" type="radio" value="1"/>1</label><label><input name="q36" type="radio" value="2"/>2</label><label><input name="q36" type="radio" value="3"/>3</label><label><input name="q36" type="radio" value="4"/>4</label><label><input name="q36" type="radio" value="5"/>5</label><div class="hint" data-hint="q36"></div></div>
+<div class="question"><p data-question="q37"></p><label><input name="q37" required="" type="radio" value="1"/>1</label><label><input name="q37" type="radio" value="2"/>2</label><label><input name="q37" type="radio" value="3"/>3</label><label><input name="q37" type="radio" value="4"/>4</label><label><input name="q37" type="radio" value="5"/>5</label><div class="hint" data-hint="q37"></div></div>
+<div class="question"><p data-question="q38"></p><label><input name="q38" required="" type="radio" value="1"/>1</label><label><input name="q38" type="radio" value="2"/>2</label><label><input name="q38" type="radio" value="3"/>3</label><label><input name="q38" type="radio" value="4"/>4</label><label><input name="q38" type="radio" value="5"/>5</label><div class="hint" data-hint="q38"></div></div>
+<div class="question"><p data-question="q39"></p><label><input name="q39" required="" type="radio" value="1"/>1</label><label><input name="q39" type="radio" value="2"/>2</label><label><input name="q39" type="radio" value="3"/>3</label><label><input name="q39" type="radio" value="4"/>4</label><label><input name="q39" type="radio" value="5"/>5</label><div class="hint" data-hint="q39"></div></div>
+<div class="question"><p data-question="q40"></p><label><input name="q40" required="" type="radio" value="1"/>1</label><label><input name="q40" type="radio" value="2"/>2</label><label><input name="q40" type="radio" value="3"/>3</label><label><input name="q40" type="radio" value="4"/>4</label><label><input name="q40" type="radio" value="5"/>5</label><div class="hint" data-hint="q40"></div></div>
+<div class="question"><p data-question="q41"></p><label><input name="q41" required="" type="radio" value="1"/>1</label><label><input name="q41" type="radio" value="2"/>2</label><label><input name="q41" type="radio" value="3"/>3</label><label><input name="q41" type="radio" value="4"/>4</label><label><input name="q41" type="radio" value="5"/>5</label><div class="hint" data-hint="q41"></div></div>
+<div class="question"><p data-question="q42"></p><label><input name="q42" required="" type="radio" value="1"/>1</label><label><input name="q42" type="radio" value="2"/>2</label><label><input name="q42" type="radio" value="3"/>3</label><label><input name="q42" type="radio" value="4"/>4</label><label><input name="q42" type="radio" value="5"/>5</label><div class="hint" data-hint="q42"></div></div>
+</section>
+<button data-i18n="submitButton" type="submit"></button>
+</form>
+<section id="result">
+<h2 data-i18n="resultTitle"></h2>
+<p id="scoreText"></p>
+<p id="recommendationText"></p>
+<details id="dimensionDetails">
+<summary data-i18n="dimensionSummary" id="dimensionSummary"></summary>
+<div id="dimensionScores"></div>
+</details>
+<details id="actionRecommendationDetails">
+<summary data-i18n="actionSummary" id="actionSummary"></summary>
+<ul id="actionRecommendations"></ul>
+</details>
+</section>
+</main>
+<script>
+const SUPABASE_URL = "https://vucyuhfscbodwdslnmkb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Yqm2JSoVoo5JHfkTf76p0A_EOZKcbY6";
+
+let supabaseClient = null;
+if (SUPABASE_URL !== "HIER_DEINE_SUPABASE_URL_EINFÜGEN" &&
+    SUPABASE_ANON_KEY !== "HIER_DEINEN_SUPABASE_ANON_KEY_EINFÜGEN" &&
+    window.supabase) {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+const weights = {
+  "Anfänger": { q1: 6.5, q2: 5, q3: 6.375, q4: 6.5, q5: 4.375, q6: 4.375, q7: 4.125, q8: 4, q9: 5.125, q10: 4.125, q11: 5.142857143, q12: 6, q13: 3.5, q14: 4.166666667, q15: 4.714285714, q16: 6.375, q17: 6.375, q18: 6, q19: 6.75, q20: 6.25, q21: 6, q22: 6, q23: 5.75, q24: 4.142857143, q25: 4.375, q26: 5.625, q27: 5.857142857, q28: 6.142857143, q29: 5.875, q30: 6, q31: 5.428571429, q32: 4.875, q33: 4.375, q34: 5.5, q35: 7, q36: 3.75, q37: 6.375, q38: 4.25, q39: 4.625, q40: 4.875, q41: 4.75, q42: 5.875, q43: 5.5 },
+  "Fortgeschrittener": { q1: 6.375, q2: 5.625, q3: 6.25, q4: 6.25, q5: 6.25, q6: 6, q7: 5.5, q8: 6.125, q9: 6.25, q10: 5.75, q11: 6.125, q12: 6.75, q13: 4.5, q14: 5.857142857, q15: 5.571428571, q16: 6, q17: 6.142857143, q18: 6.428571429, q19: 6.375, q20: 6.285714286, q21: 6.375, q22: 6.428571429, q23: 6.5, q24: 4.142857143, q25: 5.375, q26: 5.5, q27: 5.875, q28: 6.125, q29: 5.571428571, q30: 3.75, q31: 5, q32: 4.375, q33: 5.875, q34: 5.75, q35: 6.875, q36: 5, q37: 6.75, q38: 5.142857143, q39: 4.833333333, q40: 5.25, q41: 5.25, q42: 5.75, q43: 5.5 },
+  "Experte": { q1: 4.25, q2: 5.125, q3: 4.75, q4: 5.125, q5: 4.75, q6: 5.75, q7: 4.75, q8: 5.75, q9: 5.375, q10: 5.75, q11: 5.375, q12: 6, q13: 5.375, q14: 6, q15: 6.375, q16: 6, q17: 6.375, q18: 5.5, q19: 6.375, q20: 5.5, q21: 5.5, q22: 5.5, q23: 5.5, q24: 4.5, q25: 5.5, q26: 4.5, q27: 5.25, q28: 4.5, q29: 5.25, q30: 6.375, q31: 5.25, q32: 6.375, q33: 5.75, q34: 6.375, q35: 5.75, q36: 5.714285714, q37: 5.75, q38: 5.714285714, q39: 3.875, q40: 5.714285714, q41: 3.875, q42: 5.25, q43: 5.5 }, 
+};
+
+
+weights["Allgemeines Profil"] = {};
+
+for (let i = 1; i <= 43; i++) {
+  const question = `q${i}`;
+
+  weights["Allgemeines Profil"][question] = Number(
+    (
+      (
+        weights["Anfänger"][question] +
+        weights["Fortgeschrittener"][question] +
+        weights["Experte"][question]
+      ) / 3
+    ).toFixed(3)
+  );
+}
+
+
+const dimensions = {
+  "sectionInstructional": ["q1","q2","q3","q4","q5","q6","q7","q8"],
+  "sectionLearning": ["q9","q10","q11","q12","q13","q14"],
+  "sectionAssessment": ["q15","q16","q17","q18"],
+  "sectionPedagogical": ["q19","q20","q21","q22","q23"],
+  "sectionContextual": ["q24","q25","q26","q27","q28","q29","q30","q31","q32","q33","q34","q43"],
+  "sectionTechnical": ["q35","q36","q37","q38","q39","q40","q41","q42"]
+};
+
+const translations = {"de": {"mainTitle": "VR/AR-Bewertungstool", "mainSubtitle": "Framework-basierte Einschätzung von VR-/AR-Anwendungen", "languageTitle": "Sprache", "languageLabel": "Sprache auswählen:", "introTitle": "Hinweis zur Bewertung", "introText": "Diese Daten werden gespeichert, aber es werden keine personenbezogenen Daten erhoben.<br>Bewerten Sie jede Dimension auf einer Skala von 1 bis 5: 1 = trifft gar nicht zu, 5 = trifft voll zu.", "personTitle": "Angaben zur beurteilenden Person", "experienceQuestion": "Wie würden Sie Ihren Erfahrungsstand im Umgang mit immersiven Technologien (VR/AR) einschätzen?", "experienceBeginner": "Anfänger", "experienceAdvanced": "Fortgeschrittener", "experienceExpert": "Experte", "experienceBasis": "Allgemeines Profil", "experienceHint": "Diese Angabe dient der späteren Einordnung der Bewertungen.", "contextTitle": "Einsatzkontext", "evaluationQuestion": "Für welchen Zweck soll die Anwendung bewertet werden?", "evalTeachLearn": "Lehren / Lernen", "evalAssess": "Prüfen", "evalBoth": "Beides", "evaluationHint": "Je nach Auswahl werden nur relevante Bereiche angezeigt.", "sectionInstructional": "Instruktive Passung", "sectionLearning": "Lernen", "sectionAssessment": "Prüfen", "sectionPedagogical": "Pädagogisch-didaktische Passung", "sectionContextual": "Rahmenbedingungen", "sectionTechnical": "Technische Voraussetzung", "submitButton": "Auswertung anzeigen", "resultTitle": "Gesamtempfehlung", "dimensionSummary": "Detailscores nach Ebenen anzeigen", "actionSummary": "Handlungsempfehlungen anzeigen", "totalScore": "Gesamtbewertung", "overallRecommendation": "Gesamteinschätzung", "recGood": "gut geeignet", "recConditional": "bedingt geeignet", "recPoor": "eher nicht geeignet", "noActions": "Keine kritischen Einzelwerte vorhanden. Es wurden keine zusätzlichen Handlungsempfehlungen ausgelöst.", "saveError": "Die Auswertung wurde angezeigt, aber die Daten konnten nicht gespeichert werden.", "labels": {"q1": "Aufgearbeitetes Begleitmaterial", "q2": "Medienintegration", "q3": "Instruktionsqualität außerhalb der Anwendung", "q4": "Instruktionsqualität innerhalb der Anwendung", "q5": "Kontrolle außerhalb der Anwendung", "q6": "Kontrolle innerhalb der Anwendung", "q7": "Interaktivität innerhalb der Anwendung", "q8": "Feedbackmöglichkeiten innerhalb der Anwendung", "q9": "Kognitive Aktivierung", "q10": "Kognitive Belastung", "q11": "Motivation und Engagement", "q12": "Wissenserwerb", "q13": "Individualisierbarkeit", "q14": "Transferförderung", "q15": "Fairness und Vergleichbarkeit", "q16": "Akzeptanz", "q17": "Technische Reliabilität", "q18": "Validität", "q19": "Fachlich-inhaltliche Eignung", "q20": "Medien-Mehrwert", "q21": "Didaktische Zielklarheit", "q22": "Rollenklärung der Lehrkraft", "q23": "Didaktik innerhalb der Anwendung", "q24": "Alternative Optionen", "q25": "Freiwilligkeit", "q26": "Datenschutz", "q27": "Räumliche Möglichkeiten", "q28": "Ausstattung und Verfügbarkeit", "q29": "Betreuungsschlüssel", "q30": "Alter der Lernenden", "q31": "Fachliches Vorwissen Lernende", "q32": "Technisches Vorwissen Lernende", "q33": "Technisches Vorwissen der durchführenden Person", "q34": "Zeit für Lernende", "q43":"Wirtschaftliche und ökologische Nachhaltigkeit", "q35": "Systemstabilität", "q36": "Sensorischer Input", "q37": "Usability", "q38": "Interaktivität", "q39": "Präsenz und Immersion", "q40": "Barrierefreiheit", "q41": "Hardwarepassung", "q42": "Motion Sickness"}, 
+
+
+"questions": {
+  "q1": "Es gibt Material, das auf die Nutzung vorbereitet oder danach beim Nacharbeiten hilft.",
+  "q2": "Der Einsatz von VR/AR passt gut zum Unterricht oder zur Aufgabe.",
+  "q3": "Aufgaben und Erklärungen außerhalb der Anwendung sind leicht verständlich.",
+  "q4": "Anleitungen und Erklärungen innerhalb der Anwendung sind leicht verständlich.",
+  "q5": "Lehrkräfte können die Lernenden während der Nutzung von außen beobachten und unterstützen.",
+  "q6": "Lernende können die Anwendung während der Nutzung selbst ausreichend steuern.",
+  "q7": "Die Interaktionen helfen beim Lernen oder Arbeiten.",
+  "q8": "Die Anwendung gibt hilfreiche Rückmeldungen.",
+  "q9": "Die Anwendung regt die Lernenden zum Nachdenken, Entscheiden oder Problemlösen an.",
+  "q10": "Die Menge an Informationen und die verschiedenen Reize sind gut zu bewältigen.",
+  "q11": "Die Anwendung fördert die Motivation und die aktive Beteiligung der Lernenden.",
+  "q12": "Die Anwendung hilft, fachliche Inhalte oder Fähigkeiten zu verstehen.",
+  "q13": "Die Anwendung kann an unterschiedliche Lernbedürfnisse angepasst werden.",
+  "q14": "Lernende können das Gelernte auf andere oder reale Situationen übertragen.",
+  "q15": "Alle Teilnehmenden haben vergleichbare Bedingungen und Chancen.",
+  "q16": "Die Prüfungsform ist für Lernende und Lehrkräfte verständlich und angemessen.",
+  "q17": "Die Technik funktioniert zuverlässig und beeinflusst die Prüfung nicht.",
+  "q18": "Die Anwendung prüft die Kenntnisse oder Fähigkeiten, die geprüft werden sollen.",
+  "q19": "Die Inhalte sind fachlich richtig und für die Zielgruppe geeignet.",
+  "q20": "VR/AR bietet gegenüber einer normalen digitalen oder analogen Lösung einen zusätzlichen Nutzen.",
+  "q21": "Die Ziele der Anwendung sind klar.",
+  "q22": "Es ist klar, welche Aufgaben die Lehrkraft vor, während und nach der Nutzung hat.",
+  "q23": "Die Anwendung führt verständlich durch Lernwege, Aufgaben und Rückmeldungen.",
+  "q24": "Es wurde geprüft, ob eine analoge oder normale digitale Lösung besser oder zusätzlich geeignet ist.",
+  "q25": "Lernende können die Nutzung ablehnen oder bei Bedarf eine Pause oder Alternative wählen.",
+  "q26": "Es werden nur persönliche Daten gesammelt, die wirklich benötigt werden.",
+  "q27": "Es gibt genug Platz und die Nutzung ist sicher.",
+  "q28": "Alle nötigen Geräte, Programme und Lizenzen sind vorhanden.",
+  "q29": "Für die Gruppe gibt es genug Betreuung.",
+  "q30": "Die Anwendung passt zum Alter und Entwicklungsstand der Lernenden.",
+  "q31": "Die Lernenden haben genug fachliches Vorwissen für die Anwendung.",
+  "q32": "Die Lernenden haben genug technisches Vorwissen für die Anwendung.",
+  "q33": "Die durchführende Person kann die Anwendung einrichten, bedienen und bei Problemen helfen.",
+  "q34": "Es gibt genug Zeit für Erklärung, Nutzung und ein Gespräch danach.",
+  "q43": "Kosten, Wartung, Technik und notwendige Schulungen sind für den geplanten Einsatz langfristig machbar.",
+  "q35": "Die Anwendung läuft stabil, ohne Abstürze, lange Ladezeiten oder Verbindungsprobleme.",
+  "q36": "Bild, Ton, Bewegung und Vibration sind passend und nicht zu viel.",
+  "q37": "Die Anwendung ist leicht zu bedienen.",
+  "q38": "Die Anwendung reagiert zuverlässig auf Eingaben.",
+  "q39": "Das Gefühl, in der virtuellen Umgebung zu sein, unterstützt das Lernen.",
+  "q40": "Menschen mit unterschiedlichen körperlichen, sensorischen oder technischen Bedürfnissen können die Anwendung nutzen.",
+  "q41": "Die Anwendung funktioniert mit den vorhandenen Geräten.",
+  "q42": "Es gibt Pausen oder andere Möglichkeiten, wenn jemandem bei der Nutzung schlecht wird."
+},
+
+"hints": {
+  "q1": "Dazu gehören zum Beispiel eine kurze Einführung, eine Anleitung oder Hinweise für die Nachbesprechung.",
+  "q2": "Achten Sie darauf, ob VR/AR das Lernziel oder die Aufgabe wirklich unterstützt.",
+  "q3": "Achten Sie darauf, ob Lernende außerhalb der Anwendung wissen, was sie tun sollen.",
+  "q4": "Achten Sie darauf, ob die nächsten Schritte innerhalb der Anwendung klar erklärt werden.",
+  "q5": "Lehrkräfte sollten sehen können, was passiert, und bei Bedarf helfen oder eingreifen können.",
+  "q6": "Lernende sollten wichtige Schritte und Einstellungen ohne unnötige Hilfe bedienen können.",
+  "q7": "Die Interaktionen sollten mehr sein als nur ein spielerischer Effekt. Sie sollten für die Aufgabe nützlich sein.",
+  "q8": "Eine gute Rückmeldung zeigt, was richtig ist und was noch verbessert werden kann.",
+  "q9": "Lernende sollten zum Beispiel Entscheidungen treffen, Zusammenhänge erklären oder Lösungen finden.",
+  "q10": "Achten Sie auf zu viele Informationen, schnelle Reize oder eine unübersichtliche Darstellung.",
+  "q11": "Die Anwendung sollte Lernende zum Mitmachen bringen und nicht nur zum Zuschauen.",
+  "q12": "Achten Sie darauf, ob Lernende durch die Anwendung etwas Wichtiges verstehen oder üben.",
+  "q13": "Zum Beispiel sollten Tempo, Schwierigkeit oder Hilfen an verschiedene Lernende angepasst werden können.",
+  "q14": "Achten Sie darauf, ob Lernende das Gelernte außerhalb der Anwendung nutzen können.",
+  "q15": "Vergleichen Sie zum Beispiel Zugang, Zeit, Aufgaben und technische Bedingungen für alle.",
+  "q16": "Zweck, Ablauf und Anforderungen der Prüfung sollten für alle Beteiligten verständlich sein.",
+  "q17": "Abstürze, Verzögerungen oder Bedienungsprobleme dürfen die Leistung nicht unfair beeinflussen.",
+  "q18": "Eine gute Prüfung bewertet das Lernziel und nicht nur, ob jemand die VR/AR-Technik bedienen kann.",
+  "q19": "Achten Sie auf fachliche Fehler, passende Beispiele und eine angemessene Schwierigkeit.",
+  "q20": "Der Einsatz sollte einen Vorteil für das Lernziel bieten, der mit einer einfacheren Lösung nicht erreicht wird.",
+  "q21": "Nutzende sollten erkennen können, was sie lernen, üben oder prüfen sollen und warum VR/AR eingesetzt wird.",
+  "q22": "Legen Sie fest, wer erklärt, unterstützt, beobachtet und bei Problemen hilft.",
+  "q23": "Die Anwendung sollte klar zeigen, welche Aufgabe als Nächstes kommt und welche Rückmeldung dazu gehört.",
+  "q24": "Vergleichen Sie den Aufwand und Nutzen mit einer Lösung ohne VR/AR.",
+  "q25": "Niemand sollte zur Nutzung gezwungen werden. Bei Unwohlsein sollten Pausen oder andere Aufgaben möglich sein.",
+  "q26": "Prüfen Sie, ob die Anwendung ohne unnötige Konten, Profile oder Tracking auskommt.",
+  "q27": "Achten Sie auf freie Bewegungsflächen, sichere Wege und mögliche Hindernisse.",
+  "q28": "Prüfen Sie, ob genügend Geräte vorhanden und einsatzbereit sind.",
+  "q29": "Berücksichtigen Sie Gruppengröße, Betreuungsbedarf und die Möglichkeit, einzelnen Lernenden zu helfen.",
+  "q30": "Inhalte, Sprache und Bedienung sollten zur Altersgruppe passen.",
+  "q31": "Die Lernenden sollten die fachlichen Grundlagen kennen, die für die Aufgabe notwendig sind.",
+  "q32": "Die Lernenden sollten die technischen Grundkenntnisse haben, die für die Nutzung nötig sind.",
+  "q33": "Die durchführende Person sollte die Technik vorbereiten, erklären und bei Fehlern helfen können.",
+  "q34": "Planen Sie Zeit für Erklärung, Nutzung und ein gemeinsames Gespräch danach ein.",
+  "q43": "Berücksichtigen Sie Anschaffung, Wartung, Ersatz, technische Betreuung und Schulungen über die gesamte Nutzungsdauer.",
+  "q35": "Achten Sie auf Abstürze, lange Ladezeiten, Ausfälle und Probleme mit dem Netzwerk.",
+  "q36": "Achten Sie darauf, ob Bild, Ton, Bewegung oder Vibration zu stark, zu schnell oder störend sind.",
+  "q37": "Wichtige Funktionen sollten ohne lange Erklärung gefunden und genutzt werden können.",
+  "q38": "Achten Sie darauf, ob die Anwendung Eingaben schnell und richtig verarbeitet.",
+  "q39": "Das Eintauchen in die virtuelle Umgebung sollte das Lernen unterstützen und nicht vom Lernziel ablenken.",
+  "q40": "Berücksichtigen Sie zum Beispiel Einschränkungen beim Sehen, Hören, Bewegen oder Bedienen.",
+  "q41": "Prüfen Sie, ob die vorhandenen Geräte die Anwendung technisch unterstützen.",
+  "q42": "Planen Sie Pausen, kurze Nutzungszeiten oder eine Nutzung ohne Headset als Alternative ein."
+}
+},
+
+
+
+
+
+"en": {"mainTitle": "VR/AR Evaluation Tool", "mainSubtitle": "Framework-based evaluation of VR/AR applications", "languageTitle": "Language", "languageLabel": "Select language:", "introTitle": "Evaluation note", "introText": "These data are stored, but no personal data are collected.<br>Please rate each dimension on a scale from 1 to 5: 1 = strongly disagree, 5 = strongly agree.", "personTitle": "Information about the evaluator", "experienceQuestion": "How would you describe your level of experience with immersive technologies (VR/AR)?", "experienceBeginner": "Beginner", "experienceAdvanced": "Advanced user", "experienceExpert": "Expert", "experienceBasis": "General Profile", "experienceHint": "This information is used to contextualize the evaluation.", "contextTitle": "Use context", "evaluationQuestion": "For which purpose should the application be evaluated?", "evalTeachLearn": "Teaching / Learning", "evalAssess": "Assessment", "evalBoth": "Both", "evaluationHint": "Depending on your selection, only relevant sections are displayed.", "sectionInstructional": "Instructive fit", "sectionLearning": "Learning", "sectionAssessment": "Assessment", "sectionPedagogical": "Pedagogical Didactic Adaption", "sectionContextual": "Framework Conditions", "sectionTechnical": "Technical Sensory Foundation ", "submitButton": "Show evaluation", "resultTitle": "Overall recommendation", "dimensionSummary": "Show detail scores by level", "actionSummary": "Show recommendations for action", "totalScore": "Overall score", "overallRecommendation": "Overall assessment", "recGood": "well suited", "recConditional": "conditionally suited", "recPoor": "not well suited", "noActions": "No critical individual scores were identified. No additional recommendations for action were triggered.", "saveError": "The evaluation was displayed, but the data could not be saved.", "labels": {"q1": "Processed supporting material", "q2": "Media integration", "q3": "Instructional quality outside the application", "q4": "Instructional quality within the application", "q5": "Control outside the application", "q6": "Control within the application", "q7": "Interactivity within the application", "q8": "Feedback options within the application", "q9": "Cognitive activation", "q10": "Cognitive load", "q11": "Motivation and engagement", "q12": "Knowledge acquisition", "q13": "Individualization", "q14": "Transfer support", "q15": "Fairness and comparability", "q16": "Acceptance", "q17": "Technical reliability", "q18": "Validity", "q19": "Subject-related content suitability", "q20": "Added value of the medium", "q21": "Didactic clarity of purpose", "q22": "Clarification of the teacher role", "q23": "Didactics within the application", "q24": "Alternative options", "q25": "Voluntariness", "q26": "Data protection", "q27": "Spatial conditions", "q28": "Equipment and availability", "q29": "Supervision ratio", "q30": "Age of learners", "q31": "Learners’ subject-specific prior knowledge", "q32": "Learners’ technical prior knowledge", "q33": "Technical prior knowledge of the person conducting the activity", "q34": "Time available for learners", "q43": "Economic and ecological sustainability", "q35": "System stability", "q36": "Sensory input", "q37": "Usability", "q38": "Technical interactivity", "q39": "Presence and immersion", "q40": "Accessibility", "q41": "Hardware fit", "q42": "Motion sickness"}, 
+
+
+"questions": {
+
+  "q1": "Materials are available that prepare learners for the activity or help them review it afterwards.",
+  "q2": "The use of VR/AR fits the lesson or task well.",
+  "q3": "Tasks and explanations outside the application are easy to understand.",
+  "q4": "Instructions and explanations within the application are easy to understand.",
+  "q5": "Teachers can observe and support learners from outside the application during use.",
+  "q6": "Learners can control the application themselves during use.",
+  "q7": "The interactions help learners learn or work.",
+  "q8": "The application provides helpful feedback.",
+  "q9": "The application encourages learners to think, make decisions, or solve problems.",
+  "q10": "The amount of information and the different sensory inputs are manageable.",
+  "q11": "The application supports learners’ motivation and active participation.",
+  "q12": "The application helps learners understand subject content or develop skills.",
+  "q13": "The application can be adapted to different learning needs.",
+  "q14": "Learners can apply what they have learned to other or real-life situations.",
+  "q15": "All participants have comparable conditions and opportunities.",
+  "q16": "The assessment format is understandable and appropriate for learners and teachers.",
+  "q17": "The technology works reliably and does not affect the assessment.",
+  "q18": "The application assesses the knowledge or skills that it is intended to assess.",
+  "q19": "The content is factually correct and suitable for the target group.",
+  "q20": "VR/AR provides an additional benefit compared with a standard digital or analogue solution.",
+  "q21": "The goals of the application are clear.",
+  "q22": "It is clear what the teacher’s tasks are before, during, and after use.",
+  "q23": "The application guides learners clearly through learning paths, tasks, and feedback.",
+  "q24": "It has been checked whether an analogue or standard digital solution would be better or useful as an addition.",
+  "q25": "Learners can refuse to use the application or choose a break or alternative if needed.",
+  "q26": "Only the personal data that are really needed are collected.",
+  "q27": "There is enough space, and the use is safe.",
+  "q28": "All necessary devices, software, and licences are available.",
+  "q29": "There is enough supervision for the group.",
+  "q30": "The application is suitable for the learners’ age and stage of development.",
+  "q31": "Learners have enough subject-specific prior knowledge for the application.",
+  "q32": "Learners have enough technical prior knowledge for the application.",
+  "q33": "The person conducting the activity can set up and use the application and help with problems.",
+  "q34": "There is enough time for an explanation, use, and a discussion afterwards.",
+  "q43": "The costs, maintenance, technical requirements, and necessary training are manageable for the intended use in the long term.",
+  "q35": "The application runs reliably without crashes, long loading times, or connection problems.",
+  "q36": "Images, sound, movement, and vibration are appropriate and not overwhelming.",
+  "q37": "The application is easy to use.",
+  "q38": "The application responds reliably to user input.",
+  "q39": "The feeling of being in the virtual environment supports learning.",
+  "q40": "The application can be used by people with different physical, sensory, or technical needs.",
+  "q41": "The application works with the available devices.",
+  "q42": "Breaks or other options are available if someone feels sick while using the application."
+},
+"hints": {
+  "q1": "This may include a short introduction, instructions, or materials for a follow-up discussion.",
+  "q2": "Check whether VR/AR really supports the learning objective or task.",
+  "q3": "Check whether learners know what they are supposed to do outside the application.",
+  "q4": "Check whether the next steps are clearly explained within the application.",
+  "q5": "Teachers should be able to see what is happening and help or intervene when needed.",
+  "q6": "Learners should be able to use important steps and settings without unnecessary help.",
+  "q7": "The interactions should be more than just a playful effect. They should be useful for the task.",
+  "q8": "Good feedback shows what is correct and what can still be improved.",
+  "q9": "For example, learners should make decisions, explain connections, or find solutions.",
+  "q10": "Look for too much information, fast-moving stimuli, or an unclear presentation.",
+  "q11": "The application should encourage learners to take part, not only to watch.",
+  "q12": "Check whether learners understand or practise something important through the application.",
+  "q13": "For example, the pace, difficulty, or support should be adaptable to different learners.",
+  "q14": "Check whether learners can use what they have learned outside the application.",
+  "q15": "Compare, for example, access, time, tasks, and technical conditions for all participants.",
+  "q16": "The purpose, procedure, and requirements of the assessment should be clear to everyone involved.",
+  "q17": "Crashes, delays, or operating problems must not unfairly affect performance.",
+  "q18": "A good assessment measures the learning objective, not only whether someone can operate VR/AR technology.",
+  "q19": "Look for subject-related errors, suitable examples, and an appropriate level of difficulty.",
+  "q20": "The use should offer a benefit for the learning objective that a simpler solution cannot provide.",
+  "q21": "Users should be able to see what they are expected to learn, practise, or assess, and why VR/AR is used.",
+  "q22": "Clarify who explains, supports, observes, and helps when problems occur.",
+  "q23": "The application should clearly show which task comes next and what feedback belongs to it.",
+  "q24": "Compare the effort and benefit with a solution that does not use VR/AR.",
+  "q25": "No one should be forced to use the application. Breaks or other tasks should be possible if someone feels uncomfortable.",
+  "q26": "Check whether the application works without unnecessary accounts, profiles, or tracking.",
+  "q27": "Look for enough space to move, safe routes, and possible obstacles.",
+  "q28": "Check whether enough devices are available and ready to use.",
+  "q29": "Consider group size, support needs, and the possibility of helping individual learners.",
+  "q30": "The content, language, and controls should suit the age group.",
+  "q31": "Learners should know the subject basics needed for the task.",
+  "q32": "Learners should have the basic technical knowledge needed for use.",
+  "q33": "The person conducting the activity should be able to prepare and explain the technology and help with problems.",
+  "q34": "Plan time for explanation, use, and a group discussion afterwards.",
+  "q43": "Consider purchasing, maintenance, replacement, technical support, and training over the full period of use.",
+  "q35": "Look for crashes, long loading times, outages, and network problems.",
+  "q36": "Check whether images, sound, movement, or vibration are too strong, too fast, or distracting.",
+  "q37": "Important functions should be easy to find and use without a long explanation.",
+  "q38": "Check whether the application processes inputs quickly and correctly.",
+  "q39": "Immersion in the virtual environment should support learning and not distract from the learning goal.",
+  "q40": "Consider, for example, limitations related to seeing, hearing, moving, or operating the application.",
+  "q41": "Check whether the available devices technically support the application.",
+  "q42": "Plan breaks, short periods of use, or an option without a headset as alternatives."
+},
+
+
+
+}};
+let currentLanguage = "de";
+function tr() { return translations[currentLanguage]; }
+
+function applyLanguage() {
+  const text = tr();
+  document.documentElement.lang = currentLanguage;
+  document.title = text.mainTitle;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = text[el.dataset.i18n] || ""; });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = text[el.dataset.i18nHtml] || ""; });
+  document.querySelectorAll("[data-question]").forEach(el => { el.textContent = text.questions[el.dataset.question] || ""; });
+  document.querySelectorAll("[data-hint]").forEach(el => { el.textContent = text.hints[el.dataset.hint] || ""; });
+  document.getElementById("result").style.display = "none";
+}
+
+function setSectionRequired(section, isRequired) {
+  if (!section) return;
+  section.querySelectorAll('input[type="radio"]').forEach(input => {
+    input.required = isRequired;
+    input.disabled = !isRequired;
+  });
+}
+function showSection(section, shouldShow) {
+  if (!section) return;
+  section.style.display = shouldShow ? "block" : "none";
+  setSectionRequired(section, shouldShow);
+}
+function updateVisibleSections(value) {
+  const instruktivePassung = document.getElementById("instruktivePassungSection");
+  const lernen = document.getElementById("lernenSection");
+  const pruefen = document.getElementById("pruefenSection");
+  if (value === "LehrenLernen") {
+    showSection(instruktivePassung, true); showSection(lernen, true); showSection(pruefen, false);
+  } else if (value === "Pruefen") {
+    showSection(instruktivePassung, false); showSection(lernen, false); showSection(pruefen, true);
+  } else if (value === "Beides") {
+    showSection(instruktivePassung, true); showSection(lernen, true); showSection(pruefen, true);
+  }
+}
+document.getElementById("languageSelect").addEventListener("change", function() {
+  currentLanguage = this.value; applyLanguage();
+});
+document.querySelectorAll('input[name="evaluation_type"]').forEach(radio => {
+  radio.addEventListener("change", function() { updateVisibleSections(this.value); });
+});
+
+document.getElementById("assessmentForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const data = new FormData(e.target);
+  let rawSum = 0, count = 0, weightedSum = 0, weightSum = 0;
+  const answers = {};
+  let experienceLevel = "";
+  for (const [question, value] of data.entries()) {
+    if (question === "experience_level") { experienceLevel = value; continue; }
+    if (question === "evaluation_type") continue;
+    if (value === "") continue;
+    const numericValue = Number(value);
+    const weight = weights[experienceLevel][question] || 1;
+    answers[question] = numericValue;
+    rawSum += numericValue; count++;
+    weightedSum += numericValue * weight; weightSum += weight;
+  }
+  const unweightedAverage = rawSum / count;
+  const weightedAverage = weightedSum / weightSum;
+  const dimensionResults = {};
+  for (const [dimensionKey, questions] of Object.entries(dimensions)) {
+    let dimWeightedSum = 0, dimWeightSum = 0, dimRawSum = 0, dimCount = 0;
+    questions.forEach(question => {
+      if (answers[question] !== undefined) {
+        const value = answers[question];
+        const weight = weights[experienceLevel][question] || 1;
+        dimWeightedSum += value * weight; dimWeightSum += weight;
+        dimRawSum += value; dimCount++;
+      }
+    });
+    if (dimCount > 0 && dimWeightSum > 0) {
+      const dimensionName = tr()[dimensionKey];
+      dimensionResults[dimensionName] = { weighted: dimWeightedSum / dimWeightSum, unweighted: dimRawSum / dimCount };
+    }
+  }
+  let recommendation = "";
+  if (weightedAverage >= 4) recommendation = tr().recGood;
+  else if (weightedAverage >= 3.5) recommendation = tr().recConditional;
+  else recommendation = tr().recPoor;
+
+  document.getElementById("scoreText").textContent = tr().totalScore + ": " + weightedAverage.toFixed(2) + " / 5";
+  document.getElementById("recommendationText").textContent = tr().overallRecommendation + ": " + recommendation;
+
+  const dimensionScoresDiv = document.getElementById("dimensionScores");
+  dimensionScoresDiv.innerHTML = "";
+  for (const [dimensionName, scores] of Object.entries(dimensionResults)) {
+    const p = document.createElement("p");
+    p.innerHTML = "<strong>" + dimensionName + ":</strong> " + scores.weighted.toFixed(2) + " / 5";
+    dimensionScoresDiv.appendChild(p);
+  }
+
+  const actionList = document.getElementById("actionRecommendations");
+  actionList.innerHTML = "";
+  for (const [question, value] of Object.entries(answers)) {
+    if (value <= 2) {
+      const item = document.createElement("li");
+      item.innerHTML = "<strong>" + tr().labels[question] + ":</strong> " + tr().actions[question];
+      actionList.appendChild(item);
+    }
+  }
+  if (actionList.children.length === 0) {
+    const item = document.createElement("li");
+    item.textContent = tr().noActions;
+    actionList.appendChild(item);
+  }
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+  if (!supabaseClient) return;
+  try {
+    const { error } = await supabaseClient.from("responses").insert([{
+      experience_level: experienceLevel,
+      answers: answers,
+      average_score: weightedAverage,
+      recommendation: recommendation,
+      unweighted_score: unweightedAverage,
+      action_recommendations: Array.from(actionList.children).map(item => item.textContent)
+    }]);
+    if (error) { console.error("Fehler beim Speichern:", error); alert(tr().saveError); }
+  } catch (err) { console.error("Unerwarteter Fehler:", err); }
+});
+applyLanguage();
+</script>
+</body>
+</html>
